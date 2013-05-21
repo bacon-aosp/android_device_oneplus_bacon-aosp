@@ -463,14 +463,10 @@ typedef enum {
 typedef enum {
     CAM_AE_MODE_OFF,
     CAM_AE_MODE_ON,
-    CAM_AE_MODE_ON_AUTO_FLASH,
-    CAM_AE_MODE_ON_ALWAYS_FLASH,
-    CAM_AE_MODE_ON_AUTO_FLASH_REDEYE,
     CAM_AE_MODE_MAX
 } cam_ae_mode_type;
 
 typedef enum {
-    CAM_FOCUS_MODE_OFF,
     CAM_FOCUS_ALGO_AUTO,
     CAM_FOCUS_ALGO_SPOT,
     CAM_FOCUS_ALGO_CENTER_WEIGHTED,
@@ -1193,7 +1189,6 @@ typedef enum {
     /* Tone map mode */
     CAM_INTF_META_TONEMAP_MODE,
     CAM_INTF_META_FLASH_MODE,
-    CAM_INTF_META_ASD_HDR_SCENE_DATA,
     CAM_INTF_META_PRIVATE_DATA,
     CAM_INTF_PARM_STATS_DEBUG_MASK,
     /* Indicates streams ID of all the requested buffers */
