@@ -2104,14 +2104,14 @@ int32_t mm_jpeg_create_session(mm_jpeg_obj *my_obj,
   if ((p_params->num_src_bufs > MM_JPEG_MAX_BUF)
     || (p_params->num_dst_bufs > MM_JPEG_MAX_BUF)) {
     CDBG_ERROR("%s:%d] invalid num buffers", __func__, __LINE__);
-    return rc;
+    return -1;
   }
 
   /* check if valid client */
   clnt_idx = mm_jpeg_util_get_index_by_handler(client_hdl);
   if (clnt_idx >= MAX_JPEG_CLIENT_NUM) {
     CDBG_ERROR("%s: invalid client with handler (%d)", __func__, client_hdl);
-    return rc;
+    return -1;
   }
 
   num_omx_sessions = 1;
