@@ -144,6 +144,12 @@ typedef enum {
 } cam_position_t;
 
 typedef enum {
+    CAM_FLICKER_NONE,
+    CAM_FLICKER_50_HZ,
+    CAM_FLICKER_60_HZ
+} cam_flicker_t;
+
+typedef enum {
     CAM_FORMAT_JPEG = 0,
     CAM_FORMAT_YUV_420_NV12 = 1,
     CAM_FORMAT_YUV_420_NV21,
@@ -596,6 +602,40 @@ typedef enum {
   CAM_CDS_MODE_MAX
 } cam_cds_mode_type_t;
 
+typedef enum {
+    CAM_NOISE_REDUCTION_MODE_OFF,
+    CAM_NOISE_REDUCTION_MODE_FAST,
+    CAM_NOISE_REDUCTION_MODE_HIGH_QUALITY
+} cam_noise_reduction_mode_t;
+
+typedef enum {
+    CAM_EDGE_MODE_OFF,
+    CAM_EDGE_MODE_FAST,
+    CAM_EDGE_MODE_HIGH_QUALITY,
+} cam_edge_mode_t;
+
+typedef enum {
+    CAM_BLACK_LEVEL_LOCK_OFF,
+    CAM_BLACK_LEVEL_LOCK_ON,
+} cam_black_level_lock_t;
+
+typedef enum {
+    CAM_LENS_SHADING_MAP_MODE_OFF,
+    CAM_LENS_SHADING_MAP_MODE_ON,
+} cam_lens_shading_map_mode_t;
+
+typedef enum {
+    CAM_FACE_DETECT_MODE_OFF,
+    CAM_FACE_DETECT_MODE_SIMPLE,
+    CAM_FACE_DETECT_MODE_FULL,
+} cam_face_detect_mode_t;
+
+typedef enum {
+    CAM_TONEMAP_MODE_CONTRAST_CURVE,
+    CAM_TONEMAP_MODE_FAST,
+    CAM_TONEMAP_MODE_HIGH_QUALITY,
+} cam_tonemap_mode_t;
+
 typedef struct  {
     int32_t left;
     int32_t top;
@@ -850,6 +890,10 @@ typedef enum {
 } cam_prep_snapshot_state_t;
 
 typedef struct {
+    float gains[4];
+} cam_color_correct_gains_t;
+
+typedef struct {
     uint32_t min_frame_idx;
     uint32_t max_frame_idx;
 } cam_frame_idx_range_t;
@@ -1087,6 +1131,12 @@ typedef enum {
     /* A transform matrix to chromatically adapt pixels in the CIE XYZ (1931)
      * color space from the scene illuminant to the sRGB-standard D65-illuminant. */
     CAM_INTF_META_COLOR_CORRECT_TRANSFORM, /* 50 */
+    /*Color channel gains in the Bayer raw domain in the order [RGeGoB]*/
+    CAM_INTF_META_COLOR_CORRECT_GAINS,
+    /*The best fit color transform matrix calculated by the stats*/
+    CAM_INTF_META_PRED_COLOR_CORRECT_TRANSFORM,
+    /*The best fit color channels gains calculated by the stats*/
+    CAM_INTF_META_PRED_COLOR_CORRECT_GAINS,
     /* CONTROL */
 //    CAM_INTF_META_REQUEST_ID,
     /* A frame counter set by the framework. Must be maintained unchanged in
@@ -1115,6 +1165,8 @@ typedef enum {
     CAM_INTF_META_AWB_REGIONS,
     /* Current state of AWB algorithm */
     CAM_INTF_META_AWB_STATE,
+    /*Whether black level compensation is frozen or free to vary*/
+    CAM_INTF_META_BLACK_LEVEL_LOCK,
     /* Information to 3A routines about the purpose of this capture, to help
      * decide optimal 3A strategy */
     CAM_INTF_META_CAPTURE_INTENT,
@@ -1127,7 +1179,7 @@ typedef enum {
     CAM_INTF_META_DEMOSAIC,
     /* EDGE */
     /* Operation mode for edge enhancement */
-    CAM_INTF_META_EDGE,
+    CAM_INTF_META_EDGE_MODE,
     /* Control the amount of edge enhancement applied to the images.*/
     /* 1-10; 10 is maximum sharpening */
     CAM_INTF_META_SHARPNESS_STRENGTH,
@@ -1160,6 +1212,8 @@ typedef enum {
     CAM_INTF_META_LENS_FOCUS_RANGE,
     /* Whether optical image stabilization is enabled. */
     CAM_INTF_META_LENS_OPT_STAB_MODE,
+    /*Whether the hal needs to output the lens shading map*/
+    CAM_INTF_META_LENS_SHADING_MAP_MODE,
     /* Current lens status */
     CAM_INTF_META_LENS_STATE,
     /* NOISE REDUCTION */
@@ -1172,6 +1226,8 @@ typedef enum {
     /* Top-left corner and width of the output region to select from the active
      * pixel array */
     CAM_INTF_META_SCALER_CROP_REGION,
+    /* The estimated scene illumination lighting frequency */
+    CAM_INTF_META_SCENE_FLICKER,
     /* SENSOR */
     /* Duration each pixel is exposed to light, in nanoseconds */
     CAM_INTF_META_SENSOR_EXPOSURE_TIME,
@@ -1213,6 +1269,9 @@ typedef enum {
     CAM_INTF_META_TONEMAP_MODE,
     CAM_INTF_META_FLASH_MODE,
     CAM_INTF_META_ASD_HDR_SCENE_DATA,
+    /* 2D array of gain factors for each color channel that was used to
+     * compensate for lens shading for this frame */
+    CAM_INTF_META_LENS_SHADING_MAP,
     CAM_INTF_META_PRIVATE_DATA,
     CAM_INTF_PARM_STATS_DEBUG_MASK,
     /* Indicates streams ID of all the requested buffers */
@@ -1308,7 +1367,7 @@ typedef enum {
 
 typedef struct {
     /* 3x3 float matrix in row-major order. each element is in range of (0, 1) */
-    float transform[3][3];
+    cam_rational_type_t transform_matrix[3][3];
 } cam_color_correct_matrix_t;
 
 #define CAM_FOCAL_LENGTHS_MAX     1
@@ -1316,7 +1375,8 @@ typedef struct {
 #define CAM_FILTER_DENSITIES_MAX  1
 #define CAM_MAX_MAP_HEIGHT        6
 #define CAM_MAX_MAP_WIDTH         6
-
+#define CAM_MAX_SHADING_MAP_WIDTH 17
+#define CAM_MAX_SHADING_MAP_HEIGHT 13
 #define CAM_MAX_TONEMAP_CURVE_SIZE    128
 
 typedef struct {
@@ -1363,6 +1423,10 @@ typedef struct {
      * Higher values mean sharper (better focused) */
     int32_t sharpness[CAM_MAX_MAP_WIDTH][CAM_MAX_MAP_HEIGHT];
 } cam_sharpness_map_t;
+
+typedef struct {
+   float lens_shading[4*CAM_MAX_SHADING_MAP_HEIGHT*CAM_MAX_SHADING_MAP_WIDTH];
+} cam_lens_shading_map_t;
 
 typedef struct {
     int32_t min_value;
