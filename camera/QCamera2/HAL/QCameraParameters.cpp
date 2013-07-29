@@ -7104,6 +7104,7 @@ int32_t QCameraParameters::getStreamFormat(cam_stream_type_t streamType,
         format = mPreviewFormat;
         break;
     case CAM_STREAM_TYPE_SNAPSHOT:
+    case CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT:
         if ( mPictureFormat == CAM_FORMAT_YUV_422_NV16 ) {
             format = CAM_FORMAT_YUV_422_NV16;
         } else {
@@ -7169,7 +7170,7 @@ int QCameraParameters::getFlipMode(cam_stream_type_t type)
         str = get(KEY_QC_VIDEO_FLIP);
         break;
     case CAM_STREAM_TYPE_SNAPSHOT:
-    case CAM_STREAM_TYPE_POSTVIEW:
+    case CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT:
         str = get(KEY_QC_SNAPSHOT_PICTURE_FLIP);
         break;
     default:
@@ -7232,6 +7233,7 @@ int32_t QCameraParameters::getStreamDimension(cam_stream_type_t streamType,
         getPreviewSize(&dim.width, &dim.height);
         break;
     case CAM_STREAM_TYPE_SNAPSHOT:
+    case CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT:
         if (getRecordingHintValue() == true) {
             // live snapshot
             getLiveSnapshotSize(dim);
