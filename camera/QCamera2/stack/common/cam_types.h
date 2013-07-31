@@ -1274,7 +1274,6 @@ typedef enum {
      * compensate for lens shading for this frame */
     CAM_INTF_META_LENS_SHADING_MAP,
     CAM_INTF_META_PRIVATE_DATA,
-    CAM_INTF_PARM_STATS_DEBUG_MASK,
     /* Indicates streams ID of all the requested buffers */
     CAM_INTF_META_STREAM_ID,
     CAM_INTF_PARM_FOCUS_BRACKETING,
@@ -1282,6 +1281,7 @@ typedef enum {
     CAM_INTF_PARM_GET_IMG_PROP,
 
     CAM_INTF_PARM_UNKNOWN, // Increment CAM_INTF_PARM_MAX by 1
+    CAM_INTF_META_STREAM_TYPE_MASK,
     CAM_INTF_PARM_MAX
 } cam_intf_parm_type_t;
 
