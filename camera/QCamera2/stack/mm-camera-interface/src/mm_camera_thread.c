@@ -44,7 +44,7 @@
 typedef enum {
     /* poll entries updated */
     MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED,
-    /* poll entries updated asynchronous */
+    /* poll entries updated */
     MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED_ASYNC,
     /* exit */
     MM_CAMERA_PIPE_CMD_EXIT,
@@ -78,7 +78,7 @@ typedef struct {
  *              -1 -- failure
  *==========================================================================*/
 static int32_t mm_camera_poll_sig_async(mm_camera_poll_thread_t *poll_cb,
-                                        uint32_t cmd)
+                                  uint32_t cmd)
 {
     /* send through pipe */
     /* get the mutex */
@@ -91,10 +91,10 @@ static int32_t mm_camera_poll_sig_async(mm_camera_poll_thread_t *poll_cb,
     pthread_mutex_lock(&poll_cb->mutex);
     /* reset the statue to false */
     poll_cb->status = FALSE;
-
     /* send cmd to worker */
+
     len = write(poll_cb->pfds[1], &cmd_evt, sizeof(cmd_evt));
-    if (len < 1) {
+    if(len < 1) {
         CDBG_ERROR("%s: len = %d, errno = %d", __func__, len, errno);
         /* Avoid waiting for the signal */
         pthread_mutex_unlock(&poll_cb->mutex);
@@ -448,11 +448,9 @@ int32_t mm_camera_poll_thread_del_poll_fd(mm_camera_poll_thread_t * poll_cb,
 
         /* send poll entries updated signal to poll thread */
         if (call_type == mm_camera_sync_call ) {
-            rc = mm_camera_poll_sig(poll_cb,
-                MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED);
+            rc = mm_camera_poll_sig(poll_cb, MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED);
         } else {
-            rc = mm_camera_poll_sig_async(poll_cb,
-                MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED_ASYNC);
+            rc = mm_camera_poll_sig_async(poll_cb, MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED_ASYNC );
         }
     } else {
         CDBG_ERROR("%s: invalid handler %d (%d)",
