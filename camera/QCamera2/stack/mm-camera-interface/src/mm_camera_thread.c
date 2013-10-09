@@ -398,12 +398,10 @@ int32_t mm_camera_poll_thread_add_poll_fd(mm_camera_poll_thread_t * poll_cb,
         poll_cb->poll_entries[idx].notify_cb = notify_cb;
         poll_cb->poll_entries[idx].user_data = userdata;
         /* send poll entries updated signal to poll thread */
-        if (call_type == mm_camera_sync_call) {
-            rc = mm_camera_poll_sig(poll_cb,
-                MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED);
+        if (call_type == mm_camera_sync_call ) {
+            rc = mm_camera_poll_sig(poll_cb, MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED);
         } else {
-            rc = mm_camera_poll_sig_async(poll_cb,
-                MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED_ASYNC);
+            rc = mm_camera_poll_sig_async(poll_cb, MM_CAMERA_PIPE_CMD_POLL_ENTRIES_UPDATED_ASYNC );
         }
     } else {
         CDBG_ERROR("%s: invalid handler %d (%d)",
