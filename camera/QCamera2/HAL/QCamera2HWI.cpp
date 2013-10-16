@@ -1934,7 +1934,6 @@ QCameraHeapMemory *QCamera2HardwareInterface::allocateStreamInfoBuf(
     streamInfo->streaming_mode = CAM_STREAMING_MODE_CONTINUOUS;
     switch (stream_type) {
     case CAM_STREAM_TYPE_SNAPSHOT:
-    case CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT:
     case CAM_STREAM_TYPE_RAW:
         if ((mParameters.isZSLMode() && mParameters.getRecordingHintValue() != true) ||
                  mLongshotEnabled) {
@@ -4246,7 +4245,7 @@ int32_t QCamera2HardwareInterface::addSnapshotChannel()
         return rc;
     }
 
-    rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT,
+    rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_SNAPSHOT,
                             snapshot_stream_cb_routine, this);
     if (rc != NO_ERROR) {
         ALOGE("%s: add snapshot stream failed, ret = %d", __func__, rc);
@@ -4502,7 +4501,7 @@ int32_t QCamera2HardwareInterface::addCaptureChannel()
       }
     }
 
-    rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT,
+    rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_SNAPSHOT,
                             NULL, this);
     if (rc != NO_ERROR) {
         ALOGE("%s: add snapshot stream failed, ret = %d", __func__, rc);

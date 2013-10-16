@@ -57,4 +57,6 @@ camera_module_t HAL_MODULE_INFO_SYM = {
 #endif
     .reserved = {0}
 #endif
+    get_vendor_tag_ops: NULL,
+    reserved: {0}
 };
