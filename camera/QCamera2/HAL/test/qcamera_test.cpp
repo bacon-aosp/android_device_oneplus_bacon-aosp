@@ -1809,11 +1809,7 @@ status_t CameraContext::startPreview()
 #ifndef USE_JB_MR1
 
         gbp = mPreviewSurface->getIGraphicBufferProducer();
-#ifndef USE_VENDOR_CAMERA_EXT
         ret |= mCamera->setPreviewTarget(gbp);
-#else
-        ret |= mCamera->setPreviewTexture(gbp);
-#endif
 
 #else
 
