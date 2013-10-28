@@ -2753,6 +2753,63 @@ int QCamera2HardwareInterface::takePicture()
             return UNKNOWN_ERROR;
         }
     } else {
+        // normal capture case
+        // need to stop preview channel
+        stopChannel(QCAMERA_CH_TYPE_PREVIEW);
+        delChannel(QCAMERA_CH_TYPE_PREVIEW);
+
+        // Update stream info configuration
+        pthread_mutex_lock(&m_parm_lock);
+        rc = mParameters.setStreamConfigure(true, mLongshotEnabled);
+        if (rc != NO_ERROR) {
+            ALOGE("%s: setStreamConfigure failed %d", __func__, rc);
+            pthread_mutex_unlock(&m_parm_lock);
+            return rc;
+        }
+        pthread_mutex_unlock(&m_parm_lock);
+
+        if ( mParameters.isHDREnabled() ) {
+            // 'values' should be in "idx1,idx2,idx3,..." format
+            uint8_t hdrFrameCount = gCamCapability[mCameraId]->hdr_bracketing_setting.num_frames;
+            ALOGE("%s : HDR values %d, %d frame count: %d",
+                  __func__,
+                  (int8_t) gCamCapability[mCameraId]->hdr_bracketing_setting.exp_val.values[0],
+                  (int8_t) gCamCapability[mCameraId]->hdr_bracketing_setting.exp_val.values[1],
+                  hdrFrameCount);
+
+            // Enable AE Bracketing for HDR
+            cam_exp_bracketing_t aeBracket;
+            memset(&aeBracket, 0, sizeof(cam_exp_bracketing_t));
+            aeBracket.mode =
+                gCamCapability[mCameraId]->hdr_bracketing_setting.exp_val.mode;
+            String8 tmp;
+            for ( unsigned int i = 0; i < hdrFrameCount ; i++ ) {
+                tmp.appendFormat("%d",
+                    (int8_t) gCamCapability[mCameraId]->hdr_bracketing_setting.exp_val.values[i]);
+                tmp.append(",");
+            }
+            if (mParameters.isHDR1xFrameEnabled()
+                && mParameters.isHDR1xExtraBufferNeeded()) {
+                    tmp.appendFormat("%d", 0);
+                    tmp.append(",");
+            }
+
+            if( !tmp.isEmpty() &&
+                ( MAX_EXP_BRACKETING_LENGTH > tmp.length() ) ) {
+                //Trim last comma
+                memset(aeBracket.values, '\0', MAX_EXP_BRACKETING_LENGTH);
+                memcpy(aeBracket.values, tmp.string(), tmp.length() - 1);
+            }
+
+            ALOGE("%s : HDR config values %s",
+                  __func__,
+                  aeBracket.values);
+            rc = mParameters.setHDRAEBracket(aeBracket);
+            if ( NO_ERROR != rc ) {
+                ALOGE("%s: cannot configure HDR bracketing", __func__);
+                return rc;
+            }
+        }
 
         // start snapshot
         if (mParameters.isJpegPictureFormat() ||
@@ -4495,11 +4552,11 @@ int32_t QCamera2HardwareInterface::addCaptureChannel()
         rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_PREVIEW,
                                 preview_stream_cb_routine, this);
 
-      if (rc != NO_ERROR) {
-          ALOGE("%s: add preview stream failed, ret = %d", __func__, rc);
-          delete pChannel;
-          return rc;
-      }
+        if (rc != NO_ERROR) {
+            ALOGE("%s: add preview stream failed, ret = %d", __func__, rc);
+            delete pChannel;
+            return rc;
+        }
     }
 
     rc = addStreamToChannel(pChannel, CAM_STREAM_TYPE_NON_ZSL_SNAPSHOT,
@@ -4954,6 +5011,15 @@ int32_t QCamera2HardwareInterface::stopChannel(qcamera_ch_type_enum_t ch_type)
 int32_t QCamera2HardwareInterface::preparePreview()
 {
     int32_t rc = NO_ERROR;
+
+    pthread_mutex_lock(&m_parm_lock);
+    rc = mParameters.setStreamConfigure(false, false);
+    if (rc != NO_ERROR) {
+        ALOGE("%s: setStreamConfigure failed %d", __func__, rc);
+        pthread_mutex_unlock(&m_parm_lock);
+        return rc;
+    }
+    pthread_mutex_unlock(&m_parm_lock);
 
     if (mParameters.isZSLMode() && mParameters.getRecordingHintValue() !=true) {
         rc = addChannel(QCAMERA_CH_TYPE_ZSL);

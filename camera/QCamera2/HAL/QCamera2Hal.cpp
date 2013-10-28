@@ -55,8 +55,6 @@ camera_module_t HAL_MODULE_INFO_SYM = {
     .set_torch_mode = NULL,
     .init = NULL,
 #endif
-    .reserved = {0}
+    .reserved = {0},
 #endif
-    get_vendor_tag_ops: NULL,
-    reserved: {0}
 };
