@@ -1141,6 +1141,7 @@ typedef enum {
     CAM_INTF_PARM_FRAMESKIP,
     CAM_INTF_PARM_ZSL_MODE,  /* indicating if it's running in ZSL mode */
     CAM_INTF_PARM_HDR_NEED_1X, /* if HDR needs 1x output */ /* 40 */
+    CAM_INTF_PARM_LOCK_CAF,
     CAM_INTF_PARM_VIDEO_HDR,
     CAM_INTF_PARM_SNAPSHOT_HDR,
     CAM_INTF_PARM_ROTATION,
