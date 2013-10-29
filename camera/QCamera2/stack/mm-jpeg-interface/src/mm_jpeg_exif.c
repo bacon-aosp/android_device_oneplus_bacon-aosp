@@ -300,6 +300,7 @@ int process_sensor_data(cam_sensor_params_t *p_sensor_params,
 {
   int rc = 0;
   rat_t val_rat;
+  double av;
 
   if (NULL == p_sensor_params) {
     ALOGE("%s %d: Sensor params are null", __func__, __LINE__);
@@ -308,12 +309,15 @@ int process_sensor_data(cam_sensor_params_t *p_sensor_params,
 
   ALOGD("%s:%d] From metadata aperture = %f ", __func__, __LINE__,
     p_sensor_params->aperture_value );
-
-  val_rat.num = (uint32_t)(p_sensor_params->aperture_value * 100);
-  val_rat.denom = 100;
-  rc = addExifEntry(exif_info, EXIFTAGID_APERTURE, EXIF_RATIONAL, 1, &val_rat);
-  if (rc) {
-    ALOGE("%s:%d]: Error adding Exif Entry", __func__, __LINE__);
+  if (p_sensor_params->aperture_value > 1.0) {
+    av = (double)2.0 * log(p_sensor_params->aperture_value) / log(2.0);
+    ALOGE("%s:%d] new aperture = %f ", __func__, __LINE__, av);
+    val_rat.num = (uint32_t)(av * 100);
+    val_rat.denom = 100;
+    rc = addExifEntry(exif_info, EXIFTAGID_APERTURE, EXIF_RATIONAL, 1, &val_rat);
+    if (rc) {
+      ALOGE("%s:%d]: Error adding Exif Entry", __func__, __LINE__);
+    }
   }
 
   short flash_tag = -1;
@@ -537,29 +541,6 @@ int process_meta_data(metadata_buffer_t *p_meta, QOMX_EXIF_INFO *exif_info,
     ALOGE("%s %d:Meta data is NULL", __func__, __LINE__);
     return 0;
   }
-<<<<<<< HEAD
-  cam_ae_params_t *p_ae_params = p_meta->is_ae_params_valid ?
-    &p_meta->ae_params : &p_cam_exif_params->ae_params;
-
-  cam_awb_params_t *p_awb_params = p_meta->is_awb_params_valid ?
-    &p_meta->awb_params : &p_cam_exif_params->awb_params;
-
-  cam_auto_focus_data_t *p_focus_data = p_meta->is_focus_valid ?
-    &p_meta->focus_data : &p_cam_exif_params->af_params;
-
-
-  rc = process_3a_data(p_ae_params, p_awb_params, p_focus_data, exif_info);
-  if (rc) {
-    ALOGE("%s %d: Failed to extract 3a params", __func__, __LINE__);
-  }
-
-  cam_sensor_params_t *p_sensor_params = p_meta->is_sensor_params_valid ?
-    &p_meta->sensor_params : &p_cam_exif_params->sensor_params;
-
-  if (NULL != p_sensor_params) {
-    rc = process_sensor_data(p_sensor_params, exif_info, p_cam_exif_params);
-    if (rc) {
-=======
   int32_t *iso =
     (int32_t *)POINTER_OF(CAM_INTF_META_SENSOR_SENSITIVITY, p_meta);
 
@@ -612,7 +593,6 @@ int process_meta_data(metadata_buffer_t *p_meta, QOMX_EXIF_INFO *exif_info,
 
   rc = process_sensor_data(&p_sensor_params, exif_info);
   if (rc) {
->>>>>>> 73881da... QCamera2: Exif support for HAL3 metadata
       ALOGE("%s %d: Failed to extract sensor params", __func__, __LINE__);
   }
 
