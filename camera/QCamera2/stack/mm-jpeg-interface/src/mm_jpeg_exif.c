@@ -512,30 +512,32 @@ int process_3a_data(cam_ae_params_t *p_ae_params, cam_awb_params_t *p_awb_params
 
 }
 
-/** processMetaData:
+/** process_meta_data:
  *
  *  Arguments:
  *   @p_meta : ptr to metadata
  *   @exif_info: Exif info struct
+ *   @mm_jpeg_exif_params: exif params
  *
  *  Return     : int32_t type of status
  *               NO_ERROR  -- success
  *              none-zero failure code
  *
  *  Description:
- *       process awb debug info
- *
- *  Notes: this needs to be filled for the metadata
+ *       Extract exif data from the metadata
  **/
-int process_meta_data(cam_metadata_info_t *p_meta, QOMX_EXIF_INFO *exif_info,
+int process_meta_data(metadata_buffer_t *p_meta, QOMX_EXIF_INFO *exif_info,
   mm_jpeg_exif_params_t *p_cam_exif_params)
 {
   int rc = 0;
+  cam_sensor_params_t p_sensor_params;
+  cam_ae_params_t p_ae_params;
 
   if (!p_meta) {
     ALOGE("%s %d:Meta data is NULL", __func__, __LINE__);
     return 0;
   }
+<<<<<<< HEAD
   cam_ae_params_t *p_ae_params = p_meta->is_ae_params_valid ?
     &p_meta->ae_params : &p_cam_exif_params->ae_params;
 
@@ -557,8 +559,62 @@ int process_meta_data(cam_metadata_info_t *p_meta, QOMX_EXIF_INFO *exif_info,
   if (NULL != p_sensor_params) {
     rc = process_sensor_data(p_sensor_params, exif_info, p_cam_exif_params);
     if (rc) {
-      ALOGE("%s %d: Failed to extract sensor params", __func__, __LINE__);
-    }
+=======
+  int32_t *iso =
+    (int32_t *)POINTER_OF(CAM_INTF_META_SENSOR_SENSITIVITY, p_meta);
+
+  int64_t *sensor_exposure_time =
+    (int64_t *)POINTER_OF(CAM_INTF_META_SENSOR_EXPOSURE_TIME, p_meta);
+
+  memset(&p_ae_params,  0,  sizeof(cam_ae_params_t));
+  if (NULL != iso) {
+    p_ae_params.iso_value= *iso;
+  } else {
+    ALOGE("%s: Cannot extract Iso value", __func__);
   }
+
+  if (NULL != sensor_exposure_time) {
+    p_ae_params.exp_time = (double)(*sensor_exposure_time / 1000000000.0);
+  } else {
+    ALOGE("%s: Cannot extract Exp time value", __func__);
+  }
+
+  rc = process_3a_data(&p_ae_params, exif_info);
+  if (rc) {
+    ALOGE("%s %d: Failed to add 3a exif params", __func__, __LINE__);
+  }
+
+  float *aperture = (float *)POINTER_OF(CAM_INTF_META_LENS_APERTURE, p_meta);
+
+  uint8_t *flash_mode = (uint8_t *) POINTER_OF(CAM_INTF_META_FLASH_MODE, p_meta);
+  uint8_t *flash_state =
+    (uint8_t *) POINTER_OF(CAM_INTF_META_FLASH_STATE, p_meta);
+
+  memset(&p_sensor_params, 0, sizeof(cam_sensor_params_t));
+
+  if (NULL != aperture) {
+     p_sensor_params.aperture_value = *aperture;
+  } else {
+    ALOGE("%s: Cannot extract Aperture value", __func__);
+  }
+
+  if (NULL != flash_mode) {
+     p_sensor_params.flash_mode = *flash_mode;
+  } else {
+    ALOGE("%s: Cannot extract flash mode value", __func__);
+  }
+
+  if (NULL != flash_state) {
+    p_sensor_params.flash_state = *flash_state;
+  } else {
+    ALOGE("%s: Cannot extract flash state value", __func__);
+  }
+
+  rc = process_sensor_data(&p_sensor_params, exif_info);
+  if (rc) {
+>>>>>>> 73881da... QCamera2: Exif support for HAL3 metadata
+      ALOGE("%s %d: Failed to extract sensor params", __func__, __LINE__);
+  }
+
   return rc;
 }
