@@ -96,7 +96,6 @@ PRODUCT_PACKAGES += \
 
 # Camera
 PRODUCT_PACKAGES += \
-    camera.bacon \
     Camera2
 
 PRODUCT_PROPERTY_OVERRIDES += \
