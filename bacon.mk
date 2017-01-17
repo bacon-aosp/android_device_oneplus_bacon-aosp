@@ -93,6 +93,13 @@ TARGET_SCREEN_WIDTH := 1080
 # BoringSSL compatibility with OpenSSL blobs
 PRODUCT_PACKAGES += \
     libboringssl-compat
+    
+# Camera
+PRODUCT_PACKAGES += \
+    camera.msm8974 \
+    libmmcamera_interface \
+    libmmjpeg_interface \
+    libqomx_core
 
 # Camera
 PRODUCT_PACKAGES += \
