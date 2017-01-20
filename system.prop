@@ -28,3 +28,6 @@ ro.qualcomm.cabl=0
 camera2.portability.force_api=1
 media.stagefright.legacyencoder=true
 media.stagefright.less-secure=true
+
+# SELinux
+ro.build.selinux=1
