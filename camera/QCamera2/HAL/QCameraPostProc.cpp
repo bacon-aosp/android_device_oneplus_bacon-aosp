@@ -673,7 +673,7 @@ int32_t QCameraPostProcessor::processData(mm_camera_super_buf_t *frame)
 
         if (meta_frame != NULL) {
             // fill in meta data frame ptr
-            jpeg_job->metadata = (cam_metadata_info_t *)meta_frame->buffer;
+            jpeg_job->metadata = (metadata_buffer_t *)meta_frame->buffer;
         }
 
         // enqueu to jpeg input queue
@@ -911,7 +911,7 @@ int32_t QCameraPostProcessor::processPPData(mm_camera_super_buf_t *frame)
 
     if (meta_frame != NULL) {
         // fill in meta data frame ptr
-        jpeg_job->metadata = (cam_metadata_info_t *)meta_frame->buffer;
+        jpeg_job->metadata = (metadata_buffer_t *)meta_frame->buffer;
     }
 
     // free pp job buf

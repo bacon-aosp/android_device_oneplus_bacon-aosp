@@ -653,6 +653,13 @@ typedef struct {
     /*Tuning Data */
     uint8_t is_tuning_params_valid;
     tuning_params_t tuning_params;
+    /* Meta valid params */
+    uint8_t is_preview_frame_skip_valid;
+    cam_frame_idx_range_t preview_frame_skip_idx_range;
+    uint8_t is_chromatix_mobicat_af_valid;
+    cam_chromatix_mobicat_af_t chromatix_mobicat_af_data;
+    uint8_t is_crop_valid;                /* if crop data is valid */
+    cam_crop_data_t crop_data;            /* crop data */
 } metadata_buffer_t;
 
 typedef struct {

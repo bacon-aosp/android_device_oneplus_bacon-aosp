@@ -608,7 +608,6 @@ public:
     void setPrvwIsoMode(int32_t isoValue);
     int32_t getPrvwIsoMode();
 
-    bool setStreamConfigure(bool isCapture, bool previewAsPostview);
 private:
     int32_t setPreviewSize(const QCameraParameters& );
     int32_t setVideoSize(const QCameraParameters& );
